@@ -1,25 +1,26 @@
-on: push
-name: Deploy to Heroku
+name: Lighthouse
+on: [push, pull_request]
 jobs:
-  release:
+  CI:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
-    - name: login
-      uses: actions/heroku@master
-      env:
-        HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-      with:
-        args: container:login
-    - name: push
-      uses: actions/heroku@master
-      env:
-        HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-      with:
-        args: container:push -a calm-fortress-1234 web
-    - name: release
-      uses: actions/heroku@master
-      env:
-        HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-      with:
-        args: container:release -a calm-fortress-1234 web
+      - name: Checkout code
+        uses: actions/checkout@v1
+
+      - name: Checkout submodules
+        uses: textbook/git-checkout-submodule-action@master
+
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v2
+        with:
+          hugo-version: "0.55.6"
+          extended: true
+
+      - name: Build site
+        run: hugo
+
+      - name: Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v2
+        with:
+          configPath: "./lighthouserc.json"
+          temporaryPublicStorage: true
