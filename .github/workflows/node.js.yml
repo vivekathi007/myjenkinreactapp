@@ -1,26 +1,16 @@
-name: Lighthouse
-on: [push, pull_request]
+name: Node CI Test
+on: 
+  pull_request :
+    branches: [master]
 jobs:
-  CI:
+  test-pull-request : 
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v1
-
-      - name: Checkout submodules
-        uses: textbook/git-checkout-submodule-action@master
-
-      - name: Setup Hugo
-        uses: peaceiris/actions-hugo@v2
+      - uses : actions/checkout@v2
+      - uses : actions/setup-node@v1
         with:
-          hugo-version: "0.55.6"
-          extended: true
-
-      - name: Build site
-        run: hugo
-
-      - name: Run Lighthouse CI
-        uses: treosh/lighthouse-ci-action@v2
-        with:
-          configPath: "./lighthouserc.json"
-          temporaryPublicStorage: true
+          node-version: 12
+      - run : npm ci
+      - run : npm test
+      - run : npm build
+      
